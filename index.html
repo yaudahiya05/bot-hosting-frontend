@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -17,7 +18,8 @@
             -webkit-touch-callout: none;
         }
 
-        html, body {
+        html,
+        body {
             height: 100%;
             overflow: hidden;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -50,14 +52,14 @@
         }
 
         .header p {
-            color: rgba(255,255,255,0.8);
+            color: rgba(255, 255, 255, 0.8);
         }
 
         .card {
             background: white;
             border-radius: 20px;
             padding: 25px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             backdrop-filter: blur(10px);
             margin-bottom: 15px;
         }
@@ -129,6 +131,11 @@
             transform: scale(0.98);
         }
 
+        .auth-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
         .qr-btn {
             background: #25D366;
             color: white;
@@ -155,7 +162,7 @@
         .qrcode-container img {
             max-width: 200px;
             border-radius: 12px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
 
         .pairing-code {
@@ -183,6 +190,7 @@
             text-align: center;
             font-weight: 500;
             font-size: 14px;
+            transition: all 0.3s;
         }
 
         .status-connecting {
@@ -209,6 +217,20 @@
             border: 1px solid #c3e6cb;
         }
 
+        .status-disconnected {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            animation: pulse-red 2s infinite;
+        }
+
+        .status-reconnecting {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+            animation: pulse-orange 2s infinite;
+        }
+
         /* Connected Bots Section */
         .connected-bots {
             max-height: 200px;
@@ -231,6 +253,11 @@
             border-left: 4px solid #25D366;
         }
 
+        .bot-item.disconnected {
+            border-left-color: #dc3545;
+            opacity: 0.6;
+        }
+
         .bot-info {
             display: flex;
             align-items: center;
@@ -249,6 +276,10 @@
             font-weight: bold;
         }
 
+        .bot-avatar.disconnected {
+            background: #dc3545;
+        }
+
         .bot-details h4 {
             color: #333;
             font-size: 14px;
@@ -265,7 +296,6 @@
             align-items: center;
             gap: 5px;
             font-size: 12px;
-            color: #25D366;
             font-weight: 500;
         }
 
@@ -277,6 +307,16 @@
             animation: pulse 2s infinite;
         }
 
+        .status-dot.offline {
+            background: #dc3545;
+            animation: none;
+        }
+
+        .status-dot.reconnecting {
+            background: #ffc107;
+            animation: pulse-orange 2s infinite;
+        }
+
         .empty-state {
             text-align: center;
             color: #999;
@@ -285,9 +325,45 @@
         }
 
         @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse-red {
+            0% {
+                background-color: #f8d7da;
+            }
+
+            50% {
+                background-color: #f5c6cb;
+            }
+
+            100% {
+                background-color: #f8d7da;
+            }
+        }
+
+        @keyframes pulse-orange {
+            0% {
+                background-color: #fff3cd;
+            }
+
+            50% {
+                background-color: #ffeaa7;
+            }
+
+            100% {
+                background-color: #fff3cd;
+            }
         }
 
         /* Disable zoom and scroll */
@@ -302,13 +378,37 @@
             -ms-user-select: none;
             user-select: none;
         }
+
+/* Tambah di bagian CSS */
+.loader {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #ffffff;
+    border-bottom-color: transparent;
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+    margin-right: 8px;
+}
+
+@keyframes rotation {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loader-hidden {
+    display: none;
+}
+
     </style>
 </head>
+
 <body class="no-select">
     <div class="container">
         <div class="header">
-            <h1>&#128302; WhatsApp Bot</h1>
-            <p>Manage your connected bots</p>
+            <h1>&#128302; WhatsApp Bot Manager</h1>
+            <p>Real-time bot status monitoring</p>
         </div>
 
         <!-- Connected Bots Section -->
@@ -333,21 +433,14 @@
 
             <div class="input-group">
                 <label for="phone">WhatsApp Number</label>
-                <input 
-                    type="tel" 
-                    id="phone" 
-                    placeholder="628123456789" 
-                    pattern="[0-9]*"
-                    inputmode="numeric"
-                    required
-                >
+                <input type="tel" id="phone" placeholder="628123456789" pattern="[0-9]*" inputmode="numeric" required>
             </div>
 
             <div class="auth-options">
-                <button class="auth-btn qr-btn" onclick="startAuth('qr')">
+                <button class="auth-btn qr-btn" onclick="startAuth('qr')" id="qrBtn">
                     <span class="icon">&#128247;</span> QR Code
                 </button>
-                <button class="auth-btn pairing-btn" onclick="startAuth('pairing')">
+                <button class="auth-btn pairing-btn" onclick="startAuth('pairing')" id="pairingBtn">
                     <span class="icon">&#128290;</span> Pairing Code
                 </button>
             </div>
@@ -364,6 +457,7 @@
         const BACKEND_URL = 'https://bot-hosting-production.up.railway.app';
         let currentSessionId = null;
         let statusCheckInterval = null;
+        let connectionMonitorInterval = null;
 
         // Prevent zoom and unwanted behaviors
         document.addEventListener('gesturestart', function(e) {
@@ -371,10 +465,12 @@
         });
 
         document.addEventListener('touchmove', function(e) {
-            if(e.scale !== 1) {
+            if (e.scale !== 1) {
                 e.preventDefault();
             }
-        }, { passive: false });
+        }, {
+            passive: false
+        });
 
         document.addEventListener('contextmenu', function(e) {
             e.preventDefault();
@@ -383,129 +479,159 @@
         // Load connected bots on page load
         document.addEventListener('DOMContentLoaded', function() {
             loadConnectedBots();
+            // Start monitoring connection status
+            startConnectionMonitoring();
         });
 
+        function setButtonsEnabled(enabled) {
+            document.getElementById('qrBtn').disabled = !enabled;
+            document.getElementById('pairingBtn').disabled = !enabled;
+        }
+
         async function startAuth(method) {
-            const phone = document.getElementById('phone').value.trim();
-            
-            if(!phone) {
-                showStatus('Masukkan nomor WhatsApp terlebih dahulu!', 'error');
-                return;
-            }
+    const phone = document.getElementById('phone').value.trim();
+    
+    if(!phone) {
+        showStatus('Masukkan nomor WhatsApp terlebih dahulu!', 'error');
+        return;
+    }
 
-            if(!phone.startsWith('62')) {
-                showStatus('Nomor harus diawali dengan 62 (Indonesia)', 'error');
-                return;
-            }
+    if(!phone.startsWith('62')) {
+        showStatus('Nomor harus diawali dengan 62 (Indonesia)', 'error');
+        return;
+    }
 
-            showStatus('Menghubungkan ke server...', 'connecting');
+    // Disable buttons during auth
+    setButtonsEnabled(false);
+    
+    // Show loader in status
+    showStatus('<div class="loader"></div> Menghubungkan ke server...', 'connecting');
 
-            try {
-                const response = await fetch(`${BACKEND_URL}/start-auth`, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({ 
-                        phoneNumber: phone, 
-                        method: method 
-                    })
-                });
+    try {
+        const response = await fetch(`${BACKEND_URL}/start-auth`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ 
+                phoneNumber: phone, 
+                method: method 
+            })
+        });
 
-                if(!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+        if(!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-                const data = await response.json();
-                currentSessionId = data.sessionId;
-                
-                if(data.type === 'qr') {
-                    document.getElementById('auth-area').innerHTML = 
-                        `<div class="qrcode-container">
-                            <h3>Scan QR Code</h3>
-                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(data.qr)}&format=png&margin=10" 
-                                 alt="QR Code" 
-                                 onerror="this.style.display='none'">
-                            <p class="instructions">
-                                WhatsApp > Linked Devices > Scan QR Code
-                            </p>
-                        </div>`;
-                } else if(data.type === 'pairing') {
-                    document.getElementById('auth-area').innerHTML = 
-                        `<div>
-                            <h3>Pairing Code</h3>
-                            <div class="pairing-code">${data.code}</div>
-                            <p class="instructions">
-                                WhatsApp > Linked Devices > Link a Device<br>
-                                Masukkan kode di atas
-                            </p>
-                        </div>`;
-                }
+        const data = await response.json();
+        currentSessionId = data.sessionId;
+        
+        // Start WebSocket connection for real-time updates
+        connectWebSocket(currentSessionId);
+        
+        if(data.type === 'qr') {
+            document.getElementById('auth-area').innerHTML = 
+                `<div class="qrcode-container">
+                    <h3>Scan QR Code</h3>
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(data.qr)}&format=png&margin=10" 
+                         alt="QR Code" 
+                         onerror="this.style.display='none'">
+                    <p class="instructions">
+                        WhatsApp > Linked Devices > Scan QR Code
+                    </p>
+                </div>`;
+        } else if(data.type === 'pairing') {
+            document.getElementById('auth-area').innerHTML = 
+                `<div>
+                    <h3>Pairing Code</h3>
+                    <div class="pairing-code">${data.code}</div>
+                    <p class="instructions">
+                        WhatsApp > Linked Devices > Link a Device<br>
+                        Masukkan kode di atas (expires in 20 detik)
+                    </p>
+                </div>`;
+        }
 
-                showStatus('Menunggu koneksi...', 'waiting');
-                
-                // Start checking connection status
-                if(statusCheckInterval) {
+                // Start checking connection status (fallback if WebSocket fails)
+                if (statusCheckInterval) {
                     clearInterval(statusCheckInterval);
                 }
                 statusCheckInterval = setInterval(() => {
                     checkConnectionStatus(currentSessionId);
-                }, 3000);
+                }, 5000);
 
-            } catch(error) {
-                console.error('Error:', error);
-                showStatus('Gagal terhubung ke server. Coba lagi.', 'error');
-            }
-        }
+                // Timeout after 30 seconds
+                setTimeout(() => {
+                    if (statusCheckInterval) {
+                        clearInterval(statusCheckInterval);
+                    }
+                    if (!document.getElementById('status').textContent.includes('berhasil') &&
+                        !document.getElementById('status').textContent.includes('connected')) {
+                        showStatus('Waktu habis! Coba lagi &#10060;', 'error');
+                        setButtonsEnabled(true);
+                    }
+                }, 30000);
+
+    } catch(error) {
+        console.error('Error:', error);
+        showStatus('Gagal terhubung ke server. Coba lagi &#10060;', 'error');
+        setButtonsEnabled(true);
+    }
+}
 
         async function checkConnectionStatus(sessionId) {
             try {
                 const response = await fetch(`${BACKEND_URL}/status/${sessionId}`);
                 const data = await response.json();
-                
-                if(data.connected) {
-                    showStatus('Bot berhasil terhubung! &#10004;', 'success');
-                    if(statusCheckInterval) {
+
+                if (data.connected) {
+                    showStatus('Bot berhasil terhubung! &#128640;', 'success');
+                    if (statusCheckInterval) {
                         clearInterval(statusCheckInterval);
                     }
+                    setButtonsEnabled(true);
                     // Clear auth area
-                    document.getElementById('auth-area').innerHTML = 
-                        '<p style="color: #999; font-size: 14px;">Bot berhasil terhubung</p>';
+                    document.getElementById('auth-area').innerHTML =
+                        '<p style="color: #999; font-size: 14px;">Bot berhasil terhubung &#10004;</p>';
                     // Reload connected bots list
                     loadConnectedBots();
                 }
-            } catch(error) {
+            } catch (error) {
                 console.error('Status check error:', error);
             }
         }
 
-        // Ganti function loadConnectedBots dengan ini:
-async function loadConnectedBots() {
+        async function loadConnectedBots() {
     try {
         const response = await fetch(`${BACKEND_URL}/connected-bots`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const bots = await response.json();
         
-        const botList = document.getElementById('bot-list');
+        const botListElement = document.getElementById('bot-list');
         
         if (bots.length > 0) {
-            botList.innerHTML = bots.map(bot => `
-                <div class="bot-item">
+            botListElement.innerHTML = bots.map(bot => `
+                <div class="bot-item ${bot.connected ? '' : 'disconnected'}">
                     <div class="bot-info">
-                        <div class="bot-avatar">${bot.phoneNumber ? bot.phoneNumber.slice(-2) : 'B'}</div>
+                        <div class="bot-avatar ${bot.connected ? '' : 'disconnected'}">
+                            ${bot.phoneNumber ? bot.phoneNumber.slice(-2) : 'B'}
+                        </div>
                         <div class="bot-details">
                             <h4>${bot.phoneNumber || bot.sessionId}</h4>
                             <span>Connected ${new Date(bot.connectionTime).toLocaleTimeString()}</span>
                         </div>
                     </div>
                     <div class="bot-status">
-                        <div class="status-dot"></div>
-                        Online
+                        <div class="status-dot ${bot.connected ? '' : 'offline'}"></div>
+                        ${bot.connected ? 'Online' : 'Offline'}
                     </div>
                 </div>
             `).join('');
         } else {
-            botList.innerHTML = `
+            botListElement.innerHTML = `
                 <div class="empty-state">
                     No bots connected yet<br>
                     <small>Setup a bot using the form below</small>
@@ -514,7 +640,8 @@ async function loadConnectedBots() {
         }
     } catch(error) {
         console.error('Error loading bots:', error);
-        botList.innerHTML = `
+        const botListElement = document.getElementById('bot-list');
+        botListElement.innerHTML = `
             <div class="empty-state">
                 Error loading connected bots
             </div>
@@ -522,14 +649,182 @@ async function loadConnectedBots() {
     }
 }
 
-// Tambah polling untuk auto-refresh connected bots
-setInterval(loadConnectedBots, 5000); // Refresh every 5 seconds
+        function startConnectionMonitoring() {
+    // Monitor connection status every 10 seconds
+    connectionMonitorInterval = setInterval(async () => {
+        if (currentSessionId) {
+            try {
+                const response = await fetch(`${BACKEND_URL}/status/${currentSessionId}`);
+                const data = await response.json();
+                
+                if (!data.connected) {
+                    showStatus('Bot disconnected! &#128683;', 'disconnected');
+                    loadConnectedBots();
+                }
+            } catch (error) {
+                console.error('Connection monitor error:', error);
+                showStatus('Connection lost! &#9888;', 'error');
+            }
+        }
+        
+        // Always refresh bot list
+        loadConnectedBots();
+    }, 10000);
+}
 
         function showStatus(message, type) {
             const statusEl = document.getElementById('status');
             statusEl.innerHTML = message;
             statusEl.className = `status-${type}`;
+
+            // Auto-hide success messages after 5 seconds
+            if (type === 'success') {
+                setTimeout(() => {
+                    if (statusEl.className === 'status-success') {
+                        statusEl.innerHTML = 'Bot ready &#128640;';
+                    }
+                }, 5000);
+            }
         }
+
+        // WebSocket connection for real-time updates
+        function connectWebSocket(sessionId) {
+            const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${wsProtocol}//${BACKEND_URL.replace(/^https?:\/\//, '')}/ws?sessionId=${sessionId}`;
+
+            const ws = new WebSocket(wsUrl);
+
+            ws.onopen = () => {
+                console.log('🔗 WebSocket connected');
+                showStatus('Real-time monitoring active &#128640;', 'success');
+            };
+
+            ws.onmessage = (event) => {
+    try {
+        const data = JSON.parse(event.data);
+        console.log('📡 WebSocket message:', data);
+        
+        switch (data.status) {
+            case 'connecting':
+                showStatus('<div class="loader"></div> Connecting to WhatsApp...', 'connecting');
+                break;
+                
+            case 'requesting_pairing':
+                showStatus('<div class="loader"></div> Requesting pairing code from WhatsApp...', 'connecting');
+                break;
+                
+            case 'pairing_code_ready':
+                // HILANGIN LOADER, tampilin code aja
+                showStatus('Pairing code generated! Enter in WhatsApp &#128290;', 'waiting');
+                // Update pairing code if it's provided
+                if (data.pairingCode) {
+                    const pairingCodeElement = document.querySelector('.pairing-code');
+                    if (pairingCodeElement) {
+                        pairingCodeElement.textContent = data.pairingCode;
+                    }
+                }
+                break;
+                
+            case 'pairing_expired':
+                showStatus('Pairing code expired! Please try again &#10060;', 'error');
+                setButtonsEnabled(true);
+                break;
+                
+            case 'pairing_failed':
+                showStatus(`Pairing failed: ${data.message} &#9888;`, 'error');
+                setButtonsEnabled(true);
+                break;
+                
+            case 'qr_generated':
+                showStatus('<div class="loader"></div> QR code generated! Scan within 30 seconds', 'waiting');
+                break;
+                
+            case 'qr_ready':
+                // HILANGIN LOADER buat QR
+                showStatus('QR code ready for scanning &#128247;', 'waiting');
+                break;
+                
+            case 'waiting_qr':
+                showStatus('<div class="loader"></div> Waiting for QR code from WhatsApp...', 'connecting');
+                break;
+                
+            case 'connected':
+                // HILANGIN LOADER, tampilin success
+                showStatus('WhatsApp successfully connected! &#128640;', 'success');
+                setButtonsEnabled(true);
+                document.getElementById('auth-area').innerHTML = 
+                    '<p style="color: #999; font-size: 14px;">Bot successfully connected &#10004;</p>';
+                loadConnectedBots();
+                break;
+                
+            case 'reconnecting':
+                showStatus('<div class="loader"></div> Connection lost, reconnecting...', 'reconnecting');
+                loadConnectedBots();
+                break;
+                
+            case 'disconnected':
+                showStatus('WhatsApp disconnected &#128683;', 'disconnected');
+                loadConnectedBots();
+                break;
+                
+            case 'timeout':
+                showStatus('Connection timeout! Please try again &#10060;', 'error');
+                setButtonsEnabled(true);
+                break;
+                
+            case 'error':
+                showStatus(`Error: ${data.message} &#9888;`, 'error');
+                setButtonsEnabled(true);
+                break;
+                
+            default:
+                if (data.connected !== undefined) {
+                    // HILANGIN/TAMBAHIN LOADER sesuai status
+                    const statusMessage = data.connected ? 
+                        'WhatsApp connected &#128640;' : 
+                        '<div class="loader"></div> WhatsApp disconnected';
+                    showStatus(statusMessage, data.connected ? 'success' : 'disconnected');
+                    loadConnectedBots();
+                }
+        }
+    } catch (error) {
+        console.error('WebSocket message parse error:', error);
+    }
+};
+
+            ws.onclose = () => {
+                console.log('🔗 WebSocket disconnected');
+                // Try to reconnect after 3 seconds
+                setTimeout(() => {
+                    if (currentSessionId) {
+                        connectWebSocket(currentSessionId);
+                    }
+                }, 3000);
+            };
+
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+            };
+
+            return ws;
+        }
+
+        // Cleanup function
+        function cleanup() {
+            if (statusCheckInterval) {
+                clearInterval(statusCheckInterval);
+                statusCheckInterval = null;
+            }
+            if (connectionMonitorInterval) {
+                clearInterval(connectionMonitorInterval);
+                connectionMonitorInterval = null;
+            }
+            currentSessionId = null;
+        }
+
+        // Handle page unload
+        window.addEventListener('beforeunload', cleanup);
     </script>
 </body>
+
 </html>
