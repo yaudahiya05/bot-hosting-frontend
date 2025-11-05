@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -281,8 +280,6 @@ html, body {
     max-width: 100%;
     word-wrap: break-word;
 }
-
-/* Connected Bots Section */
 .connected-bots {
     max-height: 200px;
     overflow-y: auto;
@@ -491,7 +488,6 @@ html, body {
     line-height: 1.4;
 }
 
-/* Storage Management Section - PASTIKAN ADA */
 .storage-management {
     margin-top: 10px;
 }
@@ -531,7 +527,6 @@ html, body {
     background: #c82333;
 }
 
-/* Animations */
 @keyframes pulse {
     0% {
         transform: scale(1);
@@ -622,7 +617,6 @@ html, body {
     margin: 0 auto 8px;
 }
 
-/* Scrollbar */
 .connected-bots::-webkit-scrollbar {
     width: 6px;
 }
@@ -641,7 +635,6 @@ html, body {
     background: #a8a8a8;
 }
 
-/* Prevent zoom */
 body {
     touch-action: pan-x pan-y;
 }
@@ -652,77 +645,74 @@ body {
         -ms-text-size-adjust: 100%;
     }
 }
-
     </style>
 </head>
-
-<body class="no-select">
-<div class="container">
-    <!-- Header -->
-    <div class="header">
-        <h1>WhatsApp Bot Manager</h1>
-        <p>Auto-connect & Real-time monitoring</p>
-    </div>
-
-    <!-- Connected Bots -->
-    <div class="card">
-        <div class="section-title">
-            <span class="icon">📱</span> Connected Bots
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>WhatsApp Bot Manager</h1>
+            <p>Auto-connect & Real-time monitoring</p>
         </div>
-        <div class="connected-bots">
-            <div id="bot-list" class="bot-list">
-                <div class="empty-state">
-                    <div class="empty-icon">🤖</div>
-                    <h3>No Bots Connected</h3>
-                    <p>Setup your first WhatsApp bot using the form below</p>
+
+        <!-- Connected Bots -->
+        <div class="card">
+            <div class="section-title">
+                <span class="icon">📱</span> Connected Bots
+            </div>
+            <div class="connected-bots">
+                <div id="bot-list" class="bot-list">
+                    <div class="empty-state">
+                        <div class="empty-icon">🤖</div>
+                        <h3>No Bots Connected</h3>
+                        <p>Setup your first WhatsApp bot using the form below</p>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Setup New Bot -->
-    <div class="card">
-        <div class="section-title">
-            <span class="icon">⚡</span> Setup New Bot
+        <!-- Setup New Bot -->
+        <div class="card">
+            <div class="section-title">
+                <span class="icon">⚡</span> Setup New Bot
+            </div>
+            <div class="input-group">
+                <label for="phone">WhatsApp Number</label>
+                <input type="tel" id="phone" placeholder="628123456789" pattern="[0-9]*" inputmode="numeric" required>
+            </div>
+            <div id="status">
+                <p style="color: #999; font-size: 14px;">Ready to connect</p>
+            </div>
+            <div class="auth-options">
+                <button class="auth-btn qr-btn" onclick="startAuth('qr')" id="qrBtn">
+                    QR Code
+                </button>
+                <button class="auth-btn pairing-btn" onclick="startAuth('pairing')" id="pairingBtn">
+                    Pairing Code
+                </button>
+            </div>
+            <div id="auth-area">
+                <p style="color: #999; font-size: 14px;">Pilih metode autentikasi</p>
+            </div>
         </div>
-        <div class="input-group">
-            <label for="phone">WhatsApp Number</label>
-            <input type="tel" id="phone" placeholder="628123456789" pattern="[0-9]*" inputmode="numeric" required>
-        </div>
-        <div id="status">
-            <p style="color: #999; font-size: 14px;">Ready to connect</p>
-        </div>
-        <div class="auth-options">
-            <button class="auth-btn qr-btn" onclick="startAuth('qr')" id="qrBtn">
-                QR Code
-            </button>
-            <button class="auth-btn pairing-btn" onclick="startAuth('pairing')" id="pairingBtn">
-                Pairing Code
-            </button>
-        </div>
-        <div id="auth-area">
-            <p style="color: #999; font-size: 14px;">Pilih metode autentikasi</p>
-        </div>
-    </div>
 
-<!-- Storage Management Section -->
-<div class="card storage-management">
-    <div class="section-title">
-        <span class="icon">💾</span> Storage Management
+        <!-- Storage Management -->
+        <div class="card storage-management">
+            <div class="section-title">
+                <span class="icon">💾</span> Storage Management
+            </div>
+            <div class="auth-options">
+                <button class="storage-btn" onclick="loadStorageSessions()">
+                    View All
+                </button>
+                <button class="storage-btn danger-btn" onclick="stopAllBots()">
+                    Stop All
+                </button>
+            </div>
+            <div id="storage-info" style="margin-top: 10px; font-size: 12px; color: #666; text-align: center;">
+                Auto-reconnect enabled
+            </div>
+        </div>
     </div>
-    <div class="auth-options">
-        <button class="storage-btn" onclick="loadStorageSessions()">
-            View All
-        </button>
-        <button class="storage-btn danger-btn" onclick="stopAllBots()">
-            Stop All
-        </button>
-    </div>
-    <div id="storage-info" style="margin-top: 10px; font-size: 12px; color: #666; text-align: center;">
-        Auto-reconnect enabled
-    </div>
-</div>
-
     <script>
         const BACKEND_URL = 'https://bot-hosting-production.up.railway.app';
         let currentSessionId = null;
