@@ -513,29 +513,36 @@ function connectWebSocket(sessionId) {
                     break;
 case 'qr_ready':
     const qrData = data.qr;
+    console.log('QR Data:', qrData);
+    
+    // Fallback QR generators
+    const qrGenerators = [
+        `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}&format=png&margin=10`,
+        `https://quickchart.io/qr?text=${encodeURIComponent(qrData)}&size=200&margin=1`,
+        `https://api.qr-code-generator.com/v1/create?access-token=YOUR_TOKEN&qr_code_text=${encodeURIComponent(qrData)}&image_format=PNG&image_width=200`
+    ];
+    
+    let qrHtml = '';
+    for (let i = 0; i < Math.min(2, qrGenerators.length); i++) {
+        qrHtml += `<img src="${qrGenerators[i]}" 
+                       alt="QR Code ${i+1}"
+                       style="border-radius: 8px; max-width: 180px; margin: 5px; border: 1px solid #ddd;"
+                       onerror="console.log('QR ${i+1} failed')">`;
+    }
     
     document.getElementById('auth-area').innerHTML = 
         `<div class="qrcode-container">
             <h3>Scan QR Code</h3>
-            <div style="background: white; padding: 20px; border-radius: 12px; display: inline-block; border: 2px solid #e9ecef;">
-                <div id="qrcode" style="width: 200px; height: 200px;"></div>
+            <div style="text-align: center;">
+                ${qrHtml}
             </div>
             <p class="instructions">
                 <strong>WhatsApp > Linked Devices > Link a Device > Scan QR Code</strong><br>
-                QR code valid for 60 seconds
+                Jika QR tidak muncul, coba refresh halaman
             </p>
-            <div style="margin-top: 10px; font-size: 10px; color: #666;">
-                Manual: Buka WhatsApp > Linked Devices > Scan QR Code<br>
-                QR Data: ${qrData.substring(0, 30)}...
-            </div>
         </div>`;
-    
-    // Load QR code library dynamically
-    loadQRCodeLibrary(qrData);
     showStatus('QR code siap untuk di-scan', 'waiting');
     break;
-
-
                     
                 case 'waiting_qr':
                     showStatus('<div class="loader"></div> Menunggu QR code dari WhatsApp...', 'connecting');
