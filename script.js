@@ -454,19 +454,35 @@ function connectWebSocket(sessionId) {
                 case 'qr_generated':
                     showStatus('<div class="loader"></div> QR code dibuat! Scan dalam 60 detik', 'waiting');
                     break;
-                case 'qr_ready':
-                    document.getElementById('auth-area').innerHTML = 
-                        `<div class="qrcode-container">
-                            <h3>Scan QR Code</h3>
-                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(data.qr)}&format=png&margin=10" 
-                                 alt="QR Code" 
-                                 onerror="this.style.display='none'">
-                            <p class="instructions">
-                                WhatsApp > Linked Devices > Scan QR Code
-                            </p>
-                        </div>`;
-                    showStatus('QR code siap untuk di-scan', 'waiting');
-                    break;
+case 'qr_ready':
+    const qrData = data.qr;
+    
+    // Multiple QR code generator options
+    const qrUrls = [
+        `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}&format=png&margin=10`,
+        `https://quickchart.io/qr?text=${encodeURIComponent(qrData)}&size=200&margin=1`,
+        `https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=${encodeURIComponent(qrData)}&choe=UTF-8`
+    ];
+    
+    document.getElementById('auth-area').innerHTML = 
+        `<div class="qrcode-container">
+            <h3>Scan QR Code</h3>
+            <div style="background: white; padding: 20px; border-radius: 12px; display: inline-block; border: 2px solid #e9ecef;">
+                <img src="${qrUrls[0]}" 
+                     alt="QR Code"
+                     style="border-radius: 8px; display: block;"
+                     onerror="this.src='${qrUrls[1]}'">
+            </div>
+            <p class="instructions">
+                <strong>WhatsApp > Linked Devices > Scan QR Code</strong><br>
+                Jika QR tidak muncul, refresh halaman
+            </p>
+            <div style="margin-top: 10px; font-size: 10px; color: #666;">
+                QR Data: ${qrData.substring(0, 50)}...
+            </div>
+        </div>`;
+    showStatus('QR code siap untuk di-scan', 'waiting');
+    break;
                     
                 case 'waiting_qr':
                     showStatus('<div class="loader"></div> Menunggu QR code dari WhatsApp...', 'connecting');
