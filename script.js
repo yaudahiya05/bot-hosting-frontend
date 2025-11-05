@@ -537,26 +537,11 @@ case 'qr_ready':
     const qrData = data.qr;
     console.log('QR Data length:', qrData.length);
     console.log('QR Data sample:', qrData.substring(0, 50));
-    
-    // Test dengan data dummy dulu
-    const testQR = "2@3T4X5b6c7d8e9f0g1h2i3j4k5l6m7n8o9p0q1r2s3t4u5v6w7x8y9z0";
-    
     document.getElementById('auth-area').innerHTML = 
         `<div class="qrcode-container">
             <h3>Scan QR Code</h3>
-            
-            <!-- Test dengan data dummy -->
-            <div style="margin-bottom: 20px;">
-                <h4>Test QR (Dummy Data):</h4>
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(testQR)}&format=png&margin=10" 
-                     alt="Test QR"
-                     style="border-radius: 8px; border: 2px solid #28a745;">
-                <p style="font-size: 10px; color: #28a745;">✓ Test QR berhasil</p>
-            </div>
-            
             <!-- QR dari backend -->
             <div>
-                <h4>QR dari WhatsApp:</h4>
                 <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}&format=png&margin=10" 
                      alt="WhatsApp QR"
                      style="border-radius: 8px; border: 2px solid #007bff;"
