@@ -5,7 +5,45 @@ let connectionMonitorInterval = null;
 let wsConnection = null;
 
 // Load connected bots on page load
+// Auto-format phone number input - TARUH DI SINI (di luar semua function)
 document.addEventListener('DOMContentLoaded', function() {
+    // Auto-format untuk input nomor
+    const phoneInput = document.getElementById('phone');
+    
+    phoneInput.addEventListener('input', function(e) {
+        let value = e.target.value;
+        
+        // Remove all non-digit characters
+        value = value.replace(/\D/g, '');
+        
+        // Remove leading zeros and ensure starts with 62
+        if (value.startsWith('0')) {
+            value = '62' + value.substring(1);
+        } else if (value.startsWith('62')) {
+            // Already starts with 62, do nothing
+        } else if (value.startsWith('+62')) {
+            value = '62' + value.substring(3);
+        } else {
+            // If it doesn't start with 62, add it
+            value = '62' + value;
+        }
+        
+        // Limit to 15 digits max (62 + 13 digits)
+        value = value.substring(0, 15);
+        
+        // Update input value
+        e.target.value = value;
+    });
+
+    // Handle paste event
+    phoneInput.addEventListener('paste', function(e) {
+        // Let the input event handle the formatting
+        setTimeout(() => {
+            this.dispatchEvent(new Event('input'));
+        }, 0);
+    });
+
+    // Load connected bots dan lainnya
     loadConnectedBots();
     loadStorageInfo();
     startConnectionMonitoring();
