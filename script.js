@@ -423,7 +423,7 @@ function showStatus(message, type) {
     }
 }
 
-function loadQRCodeLibrary(qrData) {
+/*function loadQRCodeLibrary(qrData) {
     if (typeof QRCode === 'undefined') {
         const script = document.createElement('script');
         script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js';
@@ -443,7 +443,7 @@ function generateQRCode(qrData) {
         colorLight : "#ffffff",
         correctLevel : QRCode.CorrectLevel.H
     });
-}
+}*/
 
 // WebSocket connection for real-time updates
 function connectWebSocket(sessionId) {
@@ -512,35 +512,72 @@ function connectWebSocket(sessionId) {
                     showStatus('<div class="loader"></div> QR code dibuat! Scan dalam 60 detik', 'waiting');
                     break;
 case 'qr_ready':
-    const qrData = data.qr;
-    console.log('QR Data:', qrData);
+    console.log('QR Data from backend:', data);
     
-    // Fallback QR generators
-    const qrGenerators = [
-        `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}&format=png&margin=10`,
-        `https://quickchart.io/qr?text=${encodeURIComponent(qrData)}&size=200&margin=1`,
-        `https://api.qr-code-generator.com/v1/create?access-token=YOUR_TOKEN&qr_code_text=${encodeURIComponent(qrData)}&image_format=PNG&image_width=200`
-    ];
-    
-    let qrHtml = '';
-    for (let i = 0; i < Math.min(2, qrGenerators.length); i++) {
-        qrHtml += `<img src="${qrGenerators[i]}" 
-                       alt="QR Code ${i+1}"
-                       style="border-radius: 8px; max-width: 180px; margin: 5px; border: 1px solid #ddd;"
-                       onerror="console.log('QR ${i+1} failed')">`;
+    if (!data.qr || data.qr === 'undefined') {
+        document.getElementById('auth-area').innerHTML = 
+            `<div style="text-align: center; color: #dc3545;">
+                <h3>❌ QR Code Error</h3>
+                <p>QR data tidak valid dari server</p>
+                <div style="background: #f8d7da; padding: 10px; border-radius: 8px; margin: 10px 0;">
+                    <strong>Debug Info:</strong><br>
+                    QR Data: ${JSON.stringify(data)}<br>
+                    Status: ${data.status}<br>
+                    Message: ${data.message || 'No message'}
+                </div>
+                <button class="auth-btn qr-btn" onclick="startAuth('qr')" style="margin-top: 10px;">
+                    Coba Lagi
+                </button>
+            </div>`;
+        showStatus('Error: QR data tidak valid', 'error');
+        setButtonsEnabled(true);
+        break;
     }
+
+    const qrData = data.qr;
+    console.log('QR Data length:', qrData.length);
+    console.log('QR Data sample:', qrData.substring(0, 50));
+    
+    // Test dengan data dummy dulu
+    const testQR = "2@3T4X5b6c7d8e9f0g1h2i3j4k5l6m7n8o9p0q1r2s3t4u5v6w7x8y9z0";
     
     document.getElementById('auth-area').innerHTML = 
         `<div class="qrcode-container">
             <h3>Scan QR Code</h3>
-            <div style="text-align: center;">
-                ${qrHtml}
+            
+            <!-- Test dengan data dummy -->
+            <div style="margin-bottom: 20px;">
+                <h4>Test QR (Dummy Data):</h4>
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(testQR)}&format=png&margin=10" 
+                     alt="Test QR"
+                     style="border-radius: 8px; border: 2px solid #28a745;">
+                <p style="font-size: 10px; color: #28a745;">✓ Test QR berhasil</p>
             </div>
+            
+            <!-- QR dari backend -->
+            <div>
+                <h4>QR dari WhatsApp:</h4>
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}&format=png&margin=10" 
+                     alt="WhatsApp QR"
+                     style="border-radius: 8px; border: 2px solid #007bff;"
+                     onerror="this.style.borderColor='#dc3545'; this.nextElementSibling.textContent='❌ QR gagal load'">
+                <p style="font-size: 10px; color: #666;" id="qr-status">Loading QR...</p>
+            </div>
+            
             <p class="instructions">
                 <strong>WhatsApp > Linked Devices > Link a Device > Scan QR Code</strong><br>
-                Jika QR tidak muncul, coba refresh halaman
+                Scan QR "WhatsApp QR" di atas
             </p>
+            
+            <div style="margin-top: 10px; font-size: 10px; color: #666; background: #f8f9fa; padding: 8px; border-radius: 6px;">
+                <strong>Debug Info:</strong><br>
+                QR Length: ${qrData.length} chars<br>
+                First 30 chars: ${qrData.substring(0, 30)}<br>
+                Last 30 chars: ${qrData.substring(qrData.length - 30)}<br>
+                Contains 'undefined': ${qrData.includes('undefined')}
+            </div>
         </div>`;
+    
     showStatus('QR code siap untuk di-scan', 'waiting');
     break;
                     
