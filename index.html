@@ -401,6 +401,47 @@
     display: none;
 }
 
+.copy-btn {
+    background: #25D366;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.copy-btn:hover {
+    background: #128C7E;
+    transform: translateY(-1px);
+}
+
+.copy-btn:active {
+    transform: scale(0.98);
+}
+
+.copy-btn.copied {
+    background: #28a745;
+}
+
+.copy-btn:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.copy-icon {
+    font-size: 16px;
+    font-weight: bold;
+}
     </style>
 </head>
 
@@ -488,6 +529,49 @@
             document.getElementById('pairingBtn').disabled = !enabled;
         }
 
+function copyPairingCode() {
+    const pairingCodeElement = document.getElementById('pairingCode');
+    const copyButton = document.querySelector('.copy-btn');
+    
+    if (pairingCodeElement) {
+        const code = pairingCodeElement.textContent;
+        
+        // Buat temporary textarea untuk copy
+        const textArea = document.createElement('textarea');
+        textArea.value = code;
+        document.body.appendChild(textArea);
+        textArea.select();
+        textArea.setSelectionRange(0, 99999); // Untuk mobile
+        
+        try {
+            const successful = document.execCommand('copy');
+            document.body.removeChild(textArea);
+            
+            if (successful) {
+                // Ubah tampilan button jadi "Tersalin!"
+                copyButton.innerHTML = '<span class="copy-icon">&#10004;</span> Tersalin!';
+                copyButton.classList.add('copied');
+                copyButton.disabled = true;
+                
+                // Kembali ke normal setelah 2 detik
+                setTimeout(() => {
+                    copyButton.innerHTML = '<span class="copy-icon">&#128203;</span> Salin Kode';
+                    copyButton.classList.remove('copied');
+                    copyButton.disabled = false;
+                }, 2000);
+                
+                showStatus('Kode berhasil disalin! &#10004;', 'success');
+            } else {
+                showStatus('Gagal menyalin kode &#10060;', 'error');
+            }
+        } catch (err) {
+            document.body.removeChild(textArea);
+            console.error('Failed to copy: ', err);
+            showStatus('Gagal menyalin kode &#10060;', 'error');
+        }
+    }
+}
+
         async function startAuth(method) {
     const phone = document.getElementById('phone').value.trim();
     
@@ -542,16 +626,19 @@
                     </p>
                 </div>`;
         } else if(data.type === 'pairing') {
-            document.getElementById('auth-area').innerHTML = 
-                `<div>
-                    <h3>Pairing Code</h3>
-                    <div class="pairing-code">${data.code}</div>
-                    <p class="instructions">
-                        WhatsApp > Linked Devices > Link a Device<br>
-                        Masukkan kode di atas (expires in 20 detik)
-                    </p>
-                </div>`;
-        }
+    document.getElementById('auth-area').innerHTML = 
+        `<div>
+            <h3>Pairing Code</h3>
+            <div class="pairing-code" id="pairingCode">${data.code}</div>
+            <button class="copy-btn" onclick="copyPairingCode()">
+                <span class="copy-icon">&#128203;</span> Salin Kode
+            </button>
+            <p class="instructions">
+                WhatsApp > Linked Devices > Link a Device<br>
+                Masukkan kode di atas (expires in 20 detik)
+            </p>
+        </div>`;
+}
 
                 // Start checking connection status (fallback if WebSocket fails)
                 if (statusCheckInterval) {
