@@ -6,641 +6,722 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>WhatsApp Bot Manager</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none;
-        }
-
-        html,
-        body {
-            height: 100%;
-            overflow: hidden;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            position: fixed;
-            width: 100%;
-            height: 100%;
-        }
-
-        .container {
-            max-width: 400px;
-            margin: 0 auto;
-            padding: 20px;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-            padding-top: 20px;
-        }
-
-        .header h1 {
-            color: white;
-            font-size: 28px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .header p {
-            color: rgba(255, 255, 255, 0.8);
-        }
-
-        .card {
-            background: white;
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
-            margin-bottom: 15px;
-        }
-
-        .section-title {
-            color: #333;
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .icon {
-            font-size: 20px;
-            width: 24px;
-            text-align: center;
-        }
-
-        .input-group {
-            margin-bottom: 15px;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #e1e5e9;
-            border-radius: 12px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-
-        .input-group input:focus {
-            outline: none;
-            border-color: #25D366;
-        }
-
-        /* Status message di atas tombol */
-        #status {
-            margin: 15px 0;
-            padding: 12px;
-            border-radius: 12px;
-            text-align: center;
-            font-weight: 500;
-            font-size: 14px;
-            transition: all 0.3s;
-            min-height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .status-connecting {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
-        }
-
-        .status-waiting {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-        }
-
-        .status-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .status-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .status-disconnected {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-            animation: pulse-red 2s infinite;
-        }
-
-        .status-reconnecting {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
-            animation: pulse-orange 2s infinite;
-        }
-
-        /* Tombol auth yang lebih kecil */
-        .auth-options {
-            display: flex;
-            gap: 10px;
-            margin: 10px 0 20px 0;
-        }
-
-        .auth-btn {
-            flex: 1;
-            padding: 12px 16px;
-            border: none;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            height: 44px;
-        }
-
-        .auth-btn:active {
-            transform: scale(0.98);
-        }
-
-        .auth-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .qr-btn {
-            background: #25D366;
-            color: white;
-        }
-
-        .pairing-btn {
-            background: #128C7E;
-            color: white;
-        }
-
-        /* Auth area di bawah tombol */
-        #auth-area {
-            text-align: center;
-            min-height: 150px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 10px;
-        }
-
-        .qrcode-container {
-            padding: 15px;
-        }
-
-        .qrcode-container img {
-            max-width: 200px;
-            border-radius: 12px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .pairing-code-container {
-            position: relative;
-            display: inline-block;
-            margin: 10px 0;
-        }
-
-        .pairing-code {
-            font-size: 24px;
-            font-weight: bold;
-            background: #f8f9fa;
-            padding: 12px 45px 12px 15px;
-            border-radius: 10px;
-            letter-spacing: 2px;
-            color: #333;
-            border: 2px solid #e9ecef;
-            transition: all 0.3s;
-        }
-
-        .pairing-code:hover {
-            border-color: #25D366;
-        }
-
-        .copy-icon-btn {
-            position: absolute;
-            right: 8px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 6px;
-            border-radius: 6px;
-            transition: all 0.3s;
-            color: #6c757d;
-            width: 28px;
-            height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .copy-icon-btn:hover {
-            background: #e9ecef;
-            color: #25D366;
-        }
-
-        .copy-icon-btn.copied {
-            color: #28a745;
-        }
-
-        .copy-icon-btn svg {
-            width: 14px;
-            height: 14px;
-            fill: currentColor;
-        }
-
-        .instructions {
-            color: #666;
-            font-size: 12px;
-            line-height: 1.4;
-            margin-top: 8px;
-        }
-
-        /* Connected Bots Section */
-        .connected-bots {
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .bot-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .bot-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border-left: 4px solid #25D366;
-        }
-
-        .bot-item.disconnected {
-            border-left-color: #dc3545;
-            opacity: 0.6;
-        }
-
-        .bot-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .bot-avatar {
-            width: 36px;
-            height: 36px;
-            background: #25D366;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 12px;
-        }
-
-        .bot-avatar.disconnected {
-            background: #dc3545;
-        }
-
-        .bot-details h4 {
-            color: #333;
-            font-size: 13px;
-            margin-bottom: 2px;
-        }
-
-        .bot-details span {
-            color: #666;
-            font-size: 11px;
-        }
-
-        .bot-status {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 11px;
-            font-weight: 500;
-        }
-
-        .status-dot {
-            width: 6px;
-            height: 6px;
-            background: #25D366;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        .status-dot.offline {
-            background: #dc3545;
-            animation: none;
-        }
-
-        .status-dot.reconnecting {
-            background: #ffc107;
-            animation: pulse-orange 2s infinite;
-        }
-
-        .empty-state {
-            text-align: center;
-            color: #999;
-            padding: 20px;
-            font-size: 14px;
-        }
-
-        @keyframes pulse {
-            0% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.5;
-            }
-
-            100% {
-                opacity: 1;
-            }
-        }
-
-        @keyframes pulse-red {
-            0% {
-                background-color: #f8d7da;
-            }
-
-            50% {
-                background-color: #f5c6cb;
-            }
-
-            100% {
-                background-color: #f8d7da;
-            }
-        }
-
-        @keyframes pulse-orange {
-            0% {
-                background-color: #fff3cd;
-            }
-
-            50% {
-                background-color: #ffeaa7;
-            }
-
-            100% {
-                background-color: #fff3cd;
-            }
-        }
-
-        /* Disable zoom and scroll */
-        body {
-            touch-action: pan-x pan-y;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .no-select {
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-
-        /* Loader yang aesthetic */
-        .loader {
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(37, 211, 102, 0.3);
-            border-top: 2px solid #25D366;
-            border-radius: 50%;
-            display: inline-block;
-            box-sizing: border-box;
-            animation: spin 1s linear infinite;
-            margin-right: 8px;
-            vertical-align: middle;
-        }
-
-        .loader-dark {
-            border: 2px solid rgba(51, 51, 51, 0.3);
-            border-top: 2px solid #333333;
-        }
-
-        .loader-small {
-            width: 16px;
-            height: 16px;
-            border-width: 2px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Loading states yang aesthetic */
-        .loading-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(255, 255, 255, 0.9);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 12px;
-            z-index: 10;
-        }
-
-        .loading-content {
-            text-align: center;
-            color: #666;
-            font-size: 14px;
-        }
-
-        .loading-spinner {
-            width: 32px;
-            height: 32px;
-            border: 3px solid rgba(37, 211, 102, 0.2);
-            border-top: 3px solid #25D366;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 8px;
-        }
-
-        /* Stop button styles */
-        .stop-btn {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .stop-btn:hover {
-            background: #c82333;
-            transform: translateY(-1px);
-        }
-
-        .stop-btn:active {
-            transform: scale(0.95);
-        }
-
-        .stop-btn:disabled {
-            background: #6c757d;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        /* Action buttons container */
-        .bot-actions {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-        }
-
-        /* Storage Management Section */
-        .storage-btn {
-            background: #6f42c1;
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            flex: 1;
-            height: 40px;
-        }
-
-        .storage-btn:hover {
-            background: #5a2d91;
-            transform: translateY(-1px);
-        }
-
-        .storage-btn:active {
-            transform: scale(0.98);
-        }
-
-        .danger-btn {
-            background: #dc3545;
-        }
-
-        .danger-btn:hover {
-            background: #c82333;
-        }
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+}
+
+html, body {
+    min-height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    width: 100%;
+    overflow-x: hidden;
+}
+
+.container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.header h1 {
+    color: white;
+    font-size: 26px;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.header p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 14px;
+}
+
+.card {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.section-title {
+    color: #333;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.icon {
+    font-size: 20px;
+    width: 24px;
+    text-align: center;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #333;
+    font-weight: 500;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid #e1e5e9;
+    border-radius: 12px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: #25D366;
+}
+
+#status {
+    margin: 15px 0;
+    padding: 12px;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: 500;
+    font-size: 14px;
+    transition: all 0.3s;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.status-connecting {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.status-waiting {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+.status-error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.status-success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.status-disconnected {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    animation: pulse-red 2s infinite;
+}
+
+.status-reconnecting {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+    animation: pulse-orange 2s infinite;
+}
+
+.auth-options {
+    display: flex;
+    gap: 10px;
+    margin: 10px 0 20px 0;
+}
+
+.auth-btn {
+    flex: 1;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 44px;
+}
+
+.auth-btn:active {
+    transform: scale(0.98);
+}
+
+.auth-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.qr-btn {
+    background: #25D366;
+    color: white;
+}
+
+.pairing-btn {
+    background: #128C7E;
+    color: white;
+}
+
+#auth-area {
+    text-align: center;
+    min-height: 120px;
+    max-height: 300px;
+    overflow-y: auto;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    margin-top: 10px;
+    padding: 10px;
+}
+
+.qrcode-container {
+    padding: 10px;
+}
+
+.qrcode-container img {
+    max-width: 180px;
+    border-radius: 10px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.pairing-code-container {
+    position: relative;
+    display: inline-block;
+    margin: 8px 0;
+    max-width: 100%;
+}
+
+.pairing-code {
+    font-size: 22px;
+    font-weight: bold;
+    background: #f8f9fa;
+    padding: 10px 40px 10px 12px;
+    border-radius: 10px;
+    letter-spacing: 2px;
+    color: #333;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s;
+    word-break: break-all;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.copy-icon-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    transition: all 0.3s;
+    color: #6c757d;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.copy-icon-btn:hover {
+    background: #e9ecef;
+    color: #25D366;
+}
+
+.copy-icon-btn.copied {
+    color: #28a745;
+}
+
+.copy-icon-btn svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+}
+
+.instructions {
+    color: #666;
+    font-size: 11px;
+    line-height: 1.4;
+    margin-top: 8px;
+    max-width: 100%;
+    word-wrap: break-word;
+}
+
+/* Connected Bots Section */
+.connected-bots {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    background: #fafbfc;
+}
+
+.bot-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px;
+}
+
+.bot-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: white;
+    border-radius: 10px;
+    border-left: 4px solid #25D366;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s ease;
+    border: 1px solid #f1f3f4;
+}
+
+.bot-item:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-color: #e3e6e8;
+}
+
+.bot-item.disconnected {
+    border-left-color: #dc3545;
+    opacity: 0.7;
+    background: #f8f9fa;
+}
+
+.bot-item.disconnected:hover {
+    opacity: 0.9;
+}
+
+.bot-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.bot-avatar {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #25D366, #128C7E);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 13px;
+    box-shadow: 0 2px 6px rgba(37, 211, 102, 0.2);
+}
+
+.bot-avatar.disconnected {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    box-shadow: 0 2px 6px rgba(220, 53, 69, 0.2);
+}
+
+.bot-details {
+    flex: 1;
+}
+
+.bot-details h4 {
+    color: #2d3748;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    letter-spacing: -0.2px;
+}
+
+.bot-details .phone-number {
+    color: #4a5568;
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+.bot-details .connection-time {
+    color: #718096;
+    font-size: 11px;
+    font-weight: 400;
+}
+
+.bot-status-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+}
+
+.bot-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: #f0fff4;
+    color: #22543d;
+}
+
+.bot-status.offline {
+    background: #fed7d7;
+    color: #742a2a;
+}
+
+.bot-status.reconnecting {
+    background: #feebcb;
+    color: #744210;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    background: #38a169;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+    box-shadow: 0 0 0 rgba(56, 161, 105, 0.4);
+}
+
+.status-dot.offline {
+    background: #e53e3e;
+    animation: none;
+}
+
+.status-dot.reconnecting {
+    background: #d69e2e;
+    animation: pulse-orange 2s infinite;
+}
+
+.bot-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.stop-btn {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 2px 6px rgba(220, 53, 69, 0.2);
+}
+
+.stop-btn:hover {
+    background: linear-gradient(135deg, #c82333, #a71e2a);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+}
+
+.stop-btn:active {
+    transform: scale(0.95);
+}
+
+.stop-btn:disabled {
+    background: #a0aec0;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.empty-state {
+    text-align: center;
+    color: #a0aec0;
+    padding: 40px 20px;
+    font-size: 14px;
+}
+
+.empty-state .empty-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+    opacity: 0.5;
+}
+
+.empty-state h3 {
+    color: #718096;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.empty-state p {
+    color: #a0aec0;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+/* Storage Management Section - PASTIKAN ADA */
+.storage-management {
+    margin-top: 10px;
+}
+
+.storage-btn {
+    background: #6f42c1;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex: 1;
+    height: 40px;
+}
+
+.storage-btn:hover {
+    background: #5a2d91;
+    transform: translateY(-1px);
+}
+
+.storage-btn:active {
+    transform: scale(0.98);
+}
+
+.danger-btn {
+    background: #dc3545;
+}
+
+.danger-btn:hover {
+    background: #c82333;
+}
+
+/* Animations */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(56, 161, 105, 0.7);
+    }
+    70% {
+        transform: scale(1.1);
+        box-shadow: 0 0 0 6px rgba(56, 161, 105, 0);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(56, 161, 105, 0);
+    }
+}
+
+@keyframes pulse-orange {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(214, 158, 46, 0.7);
+    }
+    70% {
+        transform: scale(1.1);
+        box-shadow: 0 0 0 6px rgba(214, 158, 46, 0);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(214, 158, 46, 0);
+    }
+}
+
+@keyframes pulse-red {
+    0% {
+        background-color: #f8d7da;
+    }
+    50% {
+        background-color: #f5c6cb;
+    }
+    100% {
+        background-color: #f8d7da;
+    }
+}
+
+.loader {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(37, 211, 102, 0.3);
+    border-top: 2px solid #25D366;
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    animation: spin 1s linear infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    z-index: 10;
+}
+
+.loading-content {
+    text-align: center;
+    color: #666;
+    font-size: 14px;
+}
+
+.loading-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid rgba(37, 211, 102, 0.2);
+    border-top: 3px solid #25D366;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 8px;
+}
+
+/* Scrollbar */
+.connected-bots::-webkit-scrollbar {
+    width: 6px;
+}
+
+.connected-bots::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.connected-bots::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.connected-bots::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Prevent zoom */
+body {
+    touch-action: pan-x pan-y;
+}
+
+@media screen and (max-width: 768px) {
+    body {
+        -webkit-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
+    }
+}
+
     </style>
 </head>
 
 <body class="no-select">
-    <div class="container">
-        <div class="header">
-            <h1>WhatsApp Bot Manager</h1>
-            <p>Auto-connect & Real-time monitoring</p>
-        </div>
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <h1>WhatsApp Bot Manager</h1>
+        <p>Auto-connect & Real-time monitoring</p>
+    </div>
 
-        <!-- Connected Bots Section -->
-        <div class="card">
-            <div class="section-title">
-                <span class="icon">📱</span> Connected Bots
-            </div>
-            <div class="connected-bots">
-                <div id="bot-list" class="bot-list">
-                    <div class="empty-state">
-                        No bots connected yet
-                    </div>
+    <!-- Connected Bots -->
+    <div class="card">
+        <div class="section-title">
+            <span class="icon">📱</span> Connected Bots
+        </div>
+        <div class="connected-bots">
+            <div id="bot-list" class="bot-list">
+                <div class="empty-state">
+                    <div class="empty-icon">🤖</div>
+                    <h3>No Bots Connected</h3>
+                    <p>Setup your first WhatsApp bot using the form below</p>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Setup New Bot Section -->
-        <div class="card">
-            <div class="section-title">
-                <span class="icon">⚡</span> Setup New Bot
-            </div>
-
-            <div class="input-group">
-                <label for="phone">WhatsApp Number</label>
-                <input type="tel" id="phone" placeholder="628123456789" pattern="[0-9]*" inputmode="numeric" required>
-            </div>
-
-            <!-- Status message di atas tombol -->
-            <div id="status">
-                <p style="color: #999; font-size: 14px;">Ready to connect</p>
-            </div>
-
-            <!-- Tombol auth yang lebih kecil -->
-            <div class="auth-options">
-                <button class="auth-btn qr-btn" onclick="startAuth('qr')" id="qrBtn">
-                    QR Code
-                </button>
-                <button class="auth-btn pairing-btn" onclick="startAuth('pairing')" id="pairingBtn">
-                    Pairing Code
-                </button>
-            </div>
-
-            <!-- Auth area di bawah tombol -->
-            <div id="auth-area">
-                <p style="color: #999; font-size: 14px;">Pilih metode autentikasi</p>
-            </div>
+    <!-- Setup New Bot -->
+    <div class="card">
+        <div class="section-title">
+            <span class="icon">⚡</span> Setup New Bot
         </div>
-
-        <!-- Storage Management Section -->
-        <div class="card">
-            <div class="section-title">
-                <span class="icon">💾</span> Storage Management
-            </div>
-            <div class="auth-options">
-                <button class="storage-btn" onclick="loadStorageSessions()">
-                    View All
-                </button>
-                <button class="storage-btn danger-btn" onclick="stopAllBots()">
-                    Stop All
-                </button>
-            </div>
-            <div id="storage-info" style="margin-top: 10px; font-size: 12px; color: #666; text-align: center;">
-                Auto-reconnect enabled
-            </div>
+        <div class="input-group">
+            <label for="phone">WhatsApp Number</label>
+            <input type="tel" id="phone" placeholder="628123456789" pattern="[0-9]*" inputmode="numeric" required>
+        </div>
+        <div id="status">
+            <p style="color: #999; font-size: 14px;">Ready to connect</p>
+        </div>
+        <div class="auth-options">
+            <button class="auth-btn qr-btn" onclick="startAuth('qr')" id="qrBtn">
+                QR Code
+            </button>
+            <button class="auth-btn pairing-btn" onclick="startAuth('pairing')" id="pairingBtn">
+                Pairing Code
+            </button>
+        </div>
+        <div id="auth-area">
+            <p style="color: #999; font-size: 14px;">Pilih metode autentikasi</p>
         </div>
     </div>
+
+<!-- Storage Management Section -->
+<div class="card storage-management">
+    <div class="section-title">
+        <span class="icon">💾</span> Storage Management
+    </div>
+    <div class="auth-options">
+        <button class="storage-btn" onclick="loadStorageSessions()">
+            View All
+        </button>
+        <button class="storage-btn danger-btn" onclick="stopAllBots()">
+            Stop All
+        </button>
+    </div>
+    <div id="storage-info" style="margin-top: 10px; font-size: 12px; color: #666; text-align: center;">
+        Auto-reconnect enabled
+    </div>
+</div>
 
     <script>
         const BACKEND_URL = 'https://bot-hosting-production.up.railway.app';
@@ -836,56 +917,67 @@
         }
 
         async function loadConnectedBots() {
-            try {
-                const response = await fetch(`${BACKEND_URL}/connected-bots`);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const bots = await response.json();
-                
-                const botListElement = document.getElementById('bot-list');
-                
-                if (bots.length > 0) {
-                    botListElement.innerHTML = bots.map(bot => `
-                        <div class="bot-item ${bot.connected ? '' : 'disconnected'}">
-                            <div class="bot-info">
-                                <div class="bot-avatar ${bot.connected ? '' : 'disconnected'}">
-                                    ${bot.phoneNumber ? bot.phoneNumber.slice(-2) : 'B'}
-                                </div>
-                                <div class="bot-details">
-                                    <h4>${bot.phoneNumber || bot.sessionId}</h4>
-                                    <span>Connected ${new Date(bot.connectionTime).toLocaleTimeString()}</span>
-                                </div>
-                            </div>
-                            <div class="bot-actions">
-                                <div class="bot-status">
-                                    <div class="status-dot ${bot.connected ? '' : 'offline'}"></div>
-                                    ${bot.connected ? 'Online' : 'Offline'}
-                                </div>
-                                <button class="stop-btn" onclick="stopBot('${bot.phoneNumber}')" ${!bot.connected ? 'disabled' : ''}>
-                                    Stop
-                                </button>
-                            </div>
-                        </div>
-                    `).join('');
-                } else {
-                    botListElement.innerHTML = `
-                        <div class="empty-state">
-                            No bots connected yet<br>
-                            <small>Setup a bot using the form below</small>
-                        </div>
-                    `;
-                }
-            } catch(error) {
-                console.error('Error loading bots:', error);
-                const botListElement = document.getElementById('bot-list');
-                botListElement.innerHTML = `
-                    <div class="empty-state">
-                        Error loading connected bots
-                    </div>
-                `;
-            }
+    try {
+        const response = await fetch(`${BACKEND_URL}/connected-bots`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
+        const bots = await response.json();
+        
+        const botListElement = document.getElementById('bot-list');
+        
+        if (bots.length > 0) {
+            botListElement.innerHTML = bots.map(bot => `
+                <div class="bot-item ${bot.connected ? '' : 'disconnected'}">
+                    <div class="bot-info">
+                        <div class="bot-avatar ${bot.connected ? '' : 'disconnected'}">
+                            ${bot.phoneNumber ? bot.phoneNumber.slice(-2) : 'B'}
+                        </div>
+                        <div class="bot-details">
+                            <h4>${bot.phoneNumber || 'Unknown Number'}</h4>
+                            <div class="phone-number">${bot.phoneNumber || bot.sessionId}</div>
+                            <div class="connection-time">
+                                ${bot.connected ? 
+                                    `Connected ${new Date(bot.connectionTime).toLocaleTimeString()}` : 
+                                    'Disconnected'
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bot-status-container">
+                        <div class="bot-status ${bot.connected ? '' : 'offline'}">
+                            <div class="status-dot ${bot.connected ? '' : 'offline'}"></div>
+                            ${bot.connected ? 'Online' : 'Offline'}
+                        </div>
+                        <div class="bot-actions">
+                            <button class="stop-btn" onclick="stopBot('${bot.phoneNumber}')" ${!bot.connected ? 'disabled' : ''}>
+                                Stop
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            botListElement.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">🤖</div>
+                    <h3>No Bots Connected</h3>
+                    <p>Setup your first WhatsApp bot using the form below</p>
+                </div>
+            `;
+        }
+    } catch(error) {
+        console.error('Error loading bots:', error);
+        const botListElement = document.getElementById('bot-list');
+        botListElement.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">⚠️</div>
+                <h3>Connection Error</h3>
+                <p>Failed to load connected bots</p>
+            </div>
+        `;
+    }
+}
 
         async function stopBot(phoneNumber) {
             if (!confirm(`Stop bot ${phoneNumber}?`)) return;
