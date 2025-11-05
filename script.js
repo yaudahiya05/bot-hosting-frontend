@@ -423,6 +423,28 @@ function showStatus(message, type) {
     }
 }
 
+function loadQRCodeLibrary(qrData) {
+    if (typeof QRCode === 'undefined') {
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js';
+        script.onload = () => generateQRCode(qrData);
+        document.head.appendChild(script);
+    } else {
+        generateQRCode(qrData);
+    }
+}
+
+function generateQRCode(qrData) {
+    const qrcode = new QRCode(document.getElementById("qrcode"), {
+        text: qrData,
+        width: 200,
+        height: 200,
+        colorDark : "#000000",
+        colorLight : "#ffffff",
+        correctLevel : QRCode.CorrectLevel.H
+    });
+}
+
 // WebSocket connection for real-time updates
 function connectWebSocket(sessionId) {
     const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -492,32 +514,28 @@ function connectWebSocket(sessionId) {
 case 'qr_ready':
     const qrData = data.qr;
     
-    // Multiple QR code generator options
-    const qrUrls = [
-        `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}&format=png&margin=10`,
-        `https://quickchart.io/qr?text=${encodeURIComponent(qrData)}&size=200&margin=1`,
-        `https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=${encodeURIComponent(qrData)}&choe=UTF-8`
-    ];
-    
     document.getElementById('auth-area').innerHTML = 
         `<div class="qrcode-container">
             <h3>Scan QR Code</h3>
             <div style="background: white; padding: 20px; border-radius: 12px; display: inline-block; border: 2px solid #e9ecef;">
-                <img src="${qrUrls[0]}" 
-                     alt="QR Code"
-                     style="border-radius: 8px; display: block;"
-                     onerror="this.src='${qrUrls[1]}'">
+                <div id="qrcode" style="width: 200px; height: 200px;"></div>
             </div>
             <p class="instructions">
-                <strong>WhatsApp > Linked Devices > Scan QR Code</strong><br>
-                Jika QR tidak muncul, refresh halaman
+                <strong>WhatsApp > Linked Devices > Link a Device > Scan QR Code</strong><br>
+                QR code valid for 60 seconds
             </p>
             <div style="margin-top: 10px; font-size: 10px; color: #666;">
-                QR Data: ${qrData.substring(0, 50)}...
+                Manual: Buka WhatsApp > Linked Devices > Scan QR Code<br>
+                QR Data: ${qrData.substring(0, 30)}...
             </div>
         </div>`;
+    
+    // Load QR code library dynamically
+    loadQRCodeLibrary(qrData);
     showStatus('QR code siap untuk di-scan', 'waiting');
     break;
+
+
                     
                 case 'waiting_qr':
                     showStatus('<div class="loader"></div> Menunggu QR code dari WhatsApp...', 'connecting');
