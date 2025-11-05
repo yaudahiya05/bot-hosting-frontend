@@ -379,7 +379,7 @@
             user-select: none;
         }
 
-/* Tambah di bagian CSS */
+/* Tambah di bagian CSS - loader yang muter */
 .loader {
     width: 20px;
     height: 20px;
@@ -390,6 +390,12 @@
     box-sizing: border-box;
     animation: rotation 1s linear infinite;
     margin-right: 8px;
+    vertical-align: middle;
+}
+
+.loader-dark {
+    border: 2px solid #333333;
+    border-bottom-color: transparent;
 }
 
 @keyframes rotation {
@@ -793,17 +799,16 @@ function copyPairingCode() {
         
         switch (data.status) {
             case 'connecting':
-                showStatus('<div class="loader"></div> Connecting to WhatsApp...', 'connecting');
+                showStatus('<div class="loader"></div> Menghubungkan ke WhatsApp...', 'connecting');
                 break;
                 
             case 'requesting_pairing':
-                showStatus('<div class="loader"></div> Requesting pairing code from WhatsApp...', 'connecting');
+                showStatus('<div class="loader"></div> Meminta kode pairing dari WhatsApp...', 'connecting');
                 break;
                 
             case 'pairing_code_ready':
                 // HILANGIN LOADER, tampilin code aja
-                showStatus('Pairing code generated! Enter in WhatsApp &#128290;', 'waiting');
-                // Update pairing code if it's provided
+                showStatus('Kode pairing berhasil dibuat! &#128290;', 'waiting');
                 if (data.pairingCode) {
                     const pairingCodeElement = document.querySelector('.pairing-code');
                     if (pairingCodeElement) {
@@ -813,49 +818,49 @@ function copyPairingCode() {
                 break;
                 
             case 'pairing_expired':
-                showStatus('Pairing code expired! Please try again &#10060;', 'error');
+                showStatus('Kode pairing expired! Silakan coba lagi &#10060;', 'error');
                 setButtonsEnabled(true);
                 break;
                 
             case 'pairing_failed':
-                showStatus(`Pairing failed: ${data.message} &#9888;`, 'error');
+                showStatus(`Gagal pairing: ${data.message} &#9888;`, 'error');
                 setButtonsEnabled(true);
                 break;
                 
             case 'qr_generated':
-                showStatus('<div class="loader"></div> QR code generated! Scan within 30 seconds', 'waiting');
+                showStatus('<div class="loader"></div> QR code dibuat! Scan dalam 30 detik', 'waiting');
                 break;
                 
             case 'qr_ready':
                 // HILANGIN LOADER buat QR
-                showStatus('QR code ready for scanning &#128247;', 'waiting');
+                showStatus('QR code siap untuk di-scan &#128247;', 'waiting');
                 break;
                 
             case 'waiting_qr':
-                showStatus('<div class="loader"></div> Waiting for QR code from WhatsApp...', 'connecting');
+                showStatus('<div class="loader"></div> Menunggu QR code dari WhatsApp...', 'connecting');
                 break;
                 
             case 'connected':
                 // HILANGIN LOADER, tampilin success
-                showStatus('WhatsApp successfully connected! &#128640;', 'success');
+                showStatus('WhatsApp berhasil terhubung! &#128640;', 'success');
                 setButtonsEnabled(true);
                 document.getElementById('auth-area').innerHTML = 
-                    '<p style="color: #999; font-size: 14px;">Bot successfully connected &#10004;</p>';
+                    '<p style="color: #999; font-size: 14px;">Bot berhasil terhubung &#10004;</p>';
                 loadConnectedBots();
                 break;
                 
             case 'reconnecting':
-                showStatus('<div class="loader"></div> Connection lost, reconnecting...', 'reconnecting');
+                showStatus('<div class="loader"></div> Koneksi terputus, menyambung ulang...', 'reconnecting');
                 loadConnectedBots();
                 break;
                 
             case 'disconnected':
-                showStatus('WhatsApp disconnected &#128683;', 'disconnected');
+                showStatus('WhatsApp terputus &#128683;', 'disconnected');
                 loadConnectedBots();
                 break;
                 
             case 'timeout':
-                showStatus('Connection timeout! Please try again &#10060;', 'error');
+                showStatus('Koneksi timeout! Silakan coba lagi &#10060;', 'error');
                 setButtonsEnabled(true);
                 break;
                 
@@ -866,10 +871,9 @@ function copyPairingCode() {
                 
             default:
                 if (data.connected !== undefined) {
-                    // HILANGIN/TAMBAHIN LOADER sesuai status
                     const statusMessage = data.connected ? 
-                        'WhatsApp connected &#128640;' : 
-                        '<div class="loader"></div> WhatsApp disconnected';
+                        'WhatsApp terhubung &#128640;' : 
+                        '<div class="loader"></div> WhatsApp terputus';
                     showStatus(statusMessage, data.connected ? 'success' : 'disconnected');
                     loadConnectedBots();
                 }
