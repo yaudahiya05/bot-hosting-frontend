@@ -23,9 +23,6 @@ document.addEventListener('DOMContentLoaded', function() {
             // Already starts with 62, do nothing
         } else if (value.startsWith('+62')) {
             value = '62' + value.substring(3);
-        } else {
-            // If it doesn't start with 62, add it
-            value = '62' + value;
         }
         
         // Limit to 15 digits max (62 + 13 digits)
